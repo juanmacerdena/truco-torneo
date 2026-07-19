@@ -137,114 +137,57 @@ export default function TrucoTorneoDemo() {
   const safeStandings = normalizeStandings(standings);
   const safeBracket = normalizeBracket(bracket);
 
-  async function fetchJson(url) {
-    const response = await fetch(url);
-    const data = await response.json();
+  function fetchJson(url, timeoutMs = 8000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    if (!response.ok) {
-      throw new Error(data?.error || `Error loading ${url}`);
-    }
+    return fetch(url, { signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json().catch(() => null);
 
-    return data;
+        if (!response.ok) {
+          throw new Error(data?.error || `Error loading ${url}`);
+        }
+
+        return data;
+      })
+      .finally(() => clearTimeout(timeoutId));
   }
 
   const fetchData = useCallback(async () => {
     setLoading(true);
 
-    const [mesasResult, standingsResult, bracketResult] = await Promise.allSettled([
-      fetchJson("/api/mesas"),
-      fetchJson("/api/standings"),
-      fetchJson("/api/bracket"),
-    ]);
+    try {
+      const [mesasResult, standingsResult, bracketResult] = await Promise.allSettled([
+        fetchJson("/api/mesas"),
+        fetchJson("/api/standings"),
+        fetchJson("/api/bracket"),
+      ]);
 
-    if (mesasResult.status === "fulfilled") {
-      setMesas(normalizeMesas(mesasResult.value));
-    } else {
-      console.error("Error loading mesas:", mesasResult.reason);
-      setMesas(initialMesas);
+      if (mesasResult.status === "fulfilled") {
+        setMesas(normalizeMesas(mesasResult.value));
+      } else {
+        console.error("Error loading mesas:", mesasResult.reason);
+        setMesas(initialMesas);
+      }
+
+      if (standingsResult.status === "fulfilled") {
+        setStandings(normalizeStandings(standingsResult.value));
+      } else {
+        console.error("Error loading standings:", standingsResult.reason);
+        setStandings(initialStandings);
+      }
+
+      if (bracketResult.status === "fulfilled") {
+        setBracket(normalizeBracket(bracketResult.value));
+      } else {
+        console.error("Error loading bracket:", bracketResult.reason);
+        setBracket(initialBracket);
+      }
+    } finally {
+      setLoading(false);
     }
-
-    if (standingsResult.status === "fulfilled") {
-      setStandings(normalizeStandings(standingsResult.value));
-    } else {
-      console.error("Error loading standings:", standingsResult.reason);
-      setStandings(initialStandings);
-    }
-
-    if (bracketResult.status === "fulfilled") {
-      setBracket(normalizeBracket(bracketResult.value));
-    } else {
-      console.error("Error loading bracket:", bracketResult.reason);
-      setBracket(initialBracket);
-    }
-
-    setLoading(false);
-  }, [normalizeBracket, normalizeMesas, normalizeStandings]);
-
-
-const BRACKET_ROUNDS = [
-  ["cuartos", "Cuartos"],
-  ["semis", "Semifinal"],
-  ["final", "Final"],
-];
-
-function toNumber(value, fallback = 0) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function normalizeMesa(value, fallbackId) {
-  return {
-    id: toNumber(value?.id, fallbackId),
-    a: typeof value?.a === "string" ? value.a : "TBD",
-    b: typeof value?.b === "string" ? value.b : "TBD",
-    scoreA: toNumber(value?.scoreA, 0),
-    scoreB: toNumber(value?.scoreB, 0),
-    set: value?.set === "buenas" ? "buenas" : "malas",
-    status: ["libre", "jugando", "finalizada"].includes(value?.status) ? value.status : "libre",
-  };
-}
-
-function normalizeMesas(value) {
-  return Array.isArray(value)
-    ? value.map((mesa, index) => normalizeMesa(mesa, index + 1))
-    : initialMesas;
-}
-
-function normalizeStanding(value, fallbackIndex) {
-  return {
-    id: toNumber(value?.id, fallbackIndex + 1),
-    pair: typeof value?.pair === "string" ? value.pair : "TBD",
-    pj: toNumber(value?.pj, 0),
-    pg: toNumber(value?.pg, 0),
-    pp: toNumber(value?.pp, 0),
-    pts: toNumber(value?.pts, 0),
-  };
-}
-
-function normalizeStandings(value) {
-  return Array.isArray(value)
-    ? value.map((standing, index) => normalizeStanding(standing, index))
-    : initialStandings;
-}
-
-function normalizeMatch(value) {
-  return {
-    a: typeof value?.a === "string" ? value.a : "TBD",
-    b: typeof value?.b === "string" ? value.b : "TBD",
-    winner: typeof value?.winner === "string" ? value.winner : null,
-  };
-}
-
-function normalizeBracket(value) {
-  if (!value || typeof value !== "object") return initialBracket;
-
-  return {
-    cuartos: Array.isArray(value.cuartos) ? value.cuartos.map(normalizeMatch) : initialBracket.cuartos,
-    semis: Array.isArray(value.semis) ? value.semis.map(normalizeMatch) : initialBracket.semis,
-    final: Array.isArray(value.final) ? value.final.map(normalizeMatch) : initialBracket.final,
-  };
-}
+  }, []);
 
   useEffect(() => {
     fetchData();
