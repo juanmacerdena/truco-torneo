@@ -1,0 +1,23 @@
+{
+  "name": "truco-torneo",
+  "version": "1.0.0",
+  "description": "Torneo de Truco online con base de datos",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "next": "^14.1.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "lucide-react": "^0.383.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "eslint-config-next": "^14.1.0"
+  }
+}
