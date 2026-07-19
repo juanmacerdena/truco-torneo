@@ -25,26 +25,19 @@ export default async function handler(req, res) {
       res.status(200).json(data?.[0])
     }
     else if (req.method === 'POST') {
-      const { a, b, scoreA, scoreB, set, status } = req.body
-      const { data: maxMesa, error: maxError } = await supabase
-        .from('mesas')
-        .select('id')
-        .order('id', { ascending: false })
-        .limit(1)
-
-      if (maxError) throw maxError
-      const nextId = (maxMesa && maxMesa.length > 0) ? maxMesa[0].id + 1 : 1
+      const { a, b, scoreA, scoreB, set, status } = req.body || {}
+      const nextId = Math.floor(Date.now() / 1000)
 
       const { data, error } = await supabase
         .from('mesas')
         .insert({
           id: nextId,
-          a: a || 'TBD',
-          b: b || 'TBD',
-          scoreA: scoreA !== undefined ? scoreA : 0,
-          scoreB: scoreB !== undefined ? scoreB : 0,
-          set: set || 'malas',
-          status: status || 'libre'
+          a: typeof a === 'string' && a.trim() ? a.trim() : 'TBD',
+          b: typeof b === 'string' && b.trim() ? b.trim() : 'TBD',
+          scoreA: Number.isFinite(Number(scoreA)) ? Number(scoreA) : 0,
+          scoreB: Number.isFinite(Number(scoreB)) ? Number(scoreB) : 0,
+          set: set === 'buenas' ? 'buenas' : 'malas',
+          status: ['libre', 'jugando', 'finalizada'].includes(status) ? status : 'libre'
         })
         .select()
 
