@@ -12,20 +12,24 @@ Sistema de gestión online para torneos de Truco con base de datos en tiempo rea
 ## Instalación Local
 
 ### 1. Clonar el repositorio
+
 ```bash
 git clone https://github.com/juanmacerdena/truco-torneo.git
 cd truco-torneo
 ```
 
 ### 2. Instalar dependencias
+
 ```bash
 npm install
 ```
 
 ### 3. Variables de entorno
+
 El archivo `.env.local` ya contiene las credenciales. No hay nada más que configurar.
 
 ### 4. Ejecutar en desarrollo
+
 ```bash
 npm run dev
 ```
@@ -37,6 +41,7 @@ La app estará disponible en `http://localhost:3000`
 ### Tablas necesarias
 
 #### 1. Tabla `mesas`
+
 ```sql
 create table mesas (
   id int primary key,
@@ -51,6 +56,7 @@ create table mesas (
 ```
 
 #### 2. Tabla `standings`
+
 ```sql
 create table standings (
   id serial primary key,
@@ -64,6 +70,7 @@ create table standings (
 ```
 
 #### 3. Tabla `bracket`
+
 ```sql
 create table bracket (
   id int primary key default 1,
@@ -109,36 +116,45 @@ insert into standings values
 ## Deploy en Vercel
 
 ### 1. Conectar repositorio
+
 - Entrá a https://vercel.com
 - Click "New Project"
 - Selecciona tu repositorio de GitHub
 
 ### 2. Variables de entorno en Vercel
-Vercel detecta automáticamente `.env.local`, pero es recomendable setearlas en el dashboard:
+
+Vercel no usa tu `.env.local` local; cargalas en el dashboard del proyecto:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SECRET_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` o `SUPABASE_SECRET_KEY`
+
+Usá los mismos valores que tenés en desarrollo para la URL y la key pública, y la service role key real para escritura desde las API routes.
 
 ### 3. Deploy
+
 Click "Deploy" y Vercel hace todo automáticamente.
 
 ## Características
 
 ✅ **Gestión de Mesas**
+
 - Ver todas las mesas en tiempo real
 - Actualizar puntajes (admin)
 - Cambiar estado de mesas
 
 ✅ **Standings**
+
 - Tabla de posiciones actualizada
 - Puntos, partidos jugados, ganados, perdidos
 
 ✅ **Bracket de Playoff**
+
 - Visualización de cuartos, semis y final
 - Seleccionar ganadores (admin)
 
 ✅ **Admin**
+
 - Contraseña: `truco2026`
 - Control total del torneo
 

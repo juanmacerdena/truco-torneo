@@ -1,13 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SECRET_KEY
-)
+import { getSupabaseAdminClient } from '../../lib/supabaseAdmin'
 
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
+  try {
+    const supabase = getSupabaseAdminClient()
+
+    if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('bracket')
         .select('*')
@@ -15,12 +12,8 @@ export default async function handler(req, res) {
 
       if (error) throw error
       res.status(200).json(data)
-    } catch (error) {
-      res.status(400).json({ error: error.message })
-    }
-  } 
-  else if (req.method === 'PUT') {
-    try {
+    } 
+    else if (req.method === 'PUT') {
       const { cuartos, semis, final } = req.body
       const { data, error } = await supabase
         .from('bracket')
@@ -30,11 +23,11 @@ export default async function handler(req, res) {
 
       if (error) throw error
       res.status(200).json(data?.[0])
-    } catch (error) {
-      res.status(400).json({ error: error.message })
     }
-  }
-  else {
-    res.status(405).json({ error: 'Method not allowed' })
+    else {
+      res.status(405).json({ error: 'Method not allowed' })
+    }
+  } catch (error) {
+    res.status(error.statusCode || 400).json({ error: error.message })
   }
 }

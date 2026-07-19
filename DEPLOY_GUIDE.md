@@ -68,13 +68,15 @@ git push -u origin main
 
 ### 3.3 Configurar variables de entorno
 
-En la sección "Environment Variables", agregá:
+En la sección "Environment Variables" de Vercel, agregá estas variables con tus valores reales:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://vclnmxffslmxhompegwa.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_7B0fuf7X93bXdcK7ooeZuw_VEFKaJ7h
-SUPABASE_SECRET_KEY=your_supabase_secret_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 ```
+
+Si ya usabas `SUPABASE_SECRET_KEY`, el backend lo sigue aceptando como fallback, pero en Vercel conviene dejar solo `SUPABASE_SERVICE_ROLE_KEY`.
 
 ### 3.4 Deploy
 
