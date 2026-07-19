@@ -78,6 +78,40 @@ const initialBracket = {
   final: [{ a: "TBD", b: "TBD", winner: null }],
 };
 
+const BRACKET_ROUNDS = [
+  ["cuartos", "Cuartos"],
+  ["semis", "Semifinal"],
+  ["final", "Final"],
+];
+
+
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeMesa(value, fallbackId) {
+  return {
+    id: toNumber(value?.id, fallbackId),
+    a: typeof value?.a === "string" ? value.a : "TBD",
+    b: typeof value?.b === "string" ? value.b : "TBD",
+    scoreA: toNumber(value?.scoreA, 0),
+    scoreB: toNumber(value?.scoreB, 0),
+    set: value?.set === "buenas" ? "buenas" : "malas",
+    status: ["libre", "jugando", "finalizada"].includes(value?.status) ? value.status : "libre",
+  };
+}
+
+function normalizeStanding(value, fallbackIndex) {
+  return {
+    id: toNumber(value?.id, fallbackIndex + 1),
+    pair: typeof value?.pair === "string" ? value.pair : "TBD",
+    pj: toNumber(value?.pj, 0),
+    pg: toNumber(value?.pg, 0),
+    pp: toNumber(value?.pp, 0),
+    pts: toNumber(value?.pts, 0),
+  };
+}
 function normalizeMesas(value) {
   return Array.isArray(value) ? value : initialMesas;
 }
